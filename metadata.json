@@ -1,0 +1,7 @@
+{
+  "name": "Try Out TKA Bahasa Indonesia SD",
+  "description": "Simulasi Ujian dan Try Out TKA Bahasa Indonesia jenjang Sekolah Dasar (SD) lengkap dengan timer, navigasi soal, ragam tipe pilihan ganda dan matriks, serta pembahasan lengkap.",
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
