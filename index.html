@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Try Out TKA Bahasa Indonesia - Jenjang SD</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-sky-200 selection:text-sky-900">
+
+    <!-- HEADER -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <!-- Title & Logo -->
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xl shadow-md">
+                    <i class="fa-solid font-bold fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <h1 class="text-base sm:text-lg font-bold text-slate-800 leading-tight">Try Out TKA SD</h1>
+                    <p class="text-xs text-slate-500 hidden sm:block">Bahasa Indonesia • Modul Persiapan Ujian</p>
+                </div>
+            </div>
+
+            <!-- Timer & Progress Summary -->
+            <div id="exam-header-controls" class="flex items-center space-x-3 sm:space-x-6">
+                <!-- Countdown Timer -->
+                <div class="flex items-center bg-amber-50 border border-amber-200 text-amber-800 px-3 py-1.5 rounded-lg text-sm font-semibold shadow-xs">
+                    <i class="fa-regular fa-clock mr-2 text-amber-600 animate-pulse"></i>
+                    <span id="timer-display">60:00</span>
+                </div>
+
+                <!-- Grid Toggle Button (Mobile) -->
+                <button onclick="toggleMobileSidebar()" class="lg:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
+                    <i class="fa-solid fa-border-all text-lg"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div id="progress-bar-container" class="w-full bg-slate-100 h-1.5">
+            <div id="progress-bar fill" class="bg-sky-500 h-1.5 transition-all duration-300 w-0"></div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+        
+        <!-- ================= EXAM VIEW ================= -->
+        <div id="exam-view" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- LEFT COLUMN: QUESTION AREA -->
+            <div class="lg:col-span-8 flex flex-col space-y-4">
+                
+                <!-- Question Top Card -->
+                <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200">
+                    <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                        <div class="flex items-center space-x-2">
+                            <span class="bg-sky-100 text-sky-800 font-bold text-sm px-3 py-1 rounded-full">
+                                Soal <span id="current-question-num">1</span> dari <span id="total-questions-num">30</span>
+                            </span>
+                            <span id="question-type-badge" class="bg-slate-100 text-slate-600 text-xs font-semibold px-2.5 py-1 rounded-full">
+                                Pilihan Ganda
+                            </span>
+                        </div>
+                        <button onclick="toggleFlag()" id="flag-btn" class="flex items-center text-xs sm:text-sm font-medium text-slate-500 hover:text-amber-600 bg-slate-50 hover:bg-amber-50 border border-slate-200 px-3 py-1.5 rounded-lg transition-colors">
+                            <i class="fa-regular fa-flag mr-1.5" id="flag-icon"></i>
+                            <span id="flag-text">Ragu-ragu</span>
+                        </button>
+                    </div>
+
+                    <!-- Reading Passage / Stimulus Container (if available) -->
+                    <div id="stimulus-container" class="hidden mb-5 bg-sky-50/60 border border-sky-100 rounded-xl p-4 text-sm text-slate-700 leading-relaxed max-h-72 overflow-y-auto custom-scrollbar">
+                        <!-- Dynamic Stimulus HTML Insertion -->
+                    </div>
+
+                    <!-- Question Text -->
+                    <div id="question-text" class="text-base sm:text-lg font-semibold text-slate-800 leading-relaxed mb-5">
+                        <!-- Dynamic Question Text -->
+                    </div>
+
+                    <!-- Options / Interactive Answer Box -->
+                    <div id="options-container" class="space-y-3">
+                        <!-- Dynamic Options rendered via JS -->
+                    </div>
+                </div>
+
+                <!-- Action Navigation Footer -->
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex items-center justify-between">
+                    <button onclick="prevQuestion()" id="prev-btn" class="flex items-center px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-sm rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-arrow-left mr-2"></i> Sebelumnya
+                    </button>
+
+                    <div class="flex items-center space-x-2">
+                        <button onclick="openSubmitModal()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-xl shadow-sm transition-colors flex items-center">
+                            <i class="fa-solid fa-paper-plane mr-2"></i> Kirim Ujian
+                        </button>
+                        
+                        <button onclick="nextQuestion()" id="next-btn" class="flex items-center px-5 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-semibold text-sm rounded-xl shadow-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                            Selanjutnya <i class="fa-solid fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: SIDEBAR NAVIGATION PANEL -->
+            <div id="sidebar-panel" class="hidden lg:block lg:col-span-4">
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 sticky top-20">
+                    <h3 class="text-sm font-bold text-slate-800 mb-3 flex items-center justify-between">
+                        <span>Navigasi Soal</span>
+                        <span class="text-xs font-normal text-slate-500"><span id="answered-count-badge">0</span>/30 Terjawab</span>
+                    </h3>
+
+                    <!-- Color Legend -->
+                    <div class="grid grid-cols-3 gap-2 text-xs mb-4 pb-3 border-b border-slate-100">
+                        <div class="flex items-center space-x-1.5">
+                            <span class="w-3 h-3 rounded bg-slate-200"></span>
+                            <span class="text-slate-600">Belum</span>
+                        </div>
+                        <div class="flex items-center space-x-1.5">
+                            <span class="w-3 h-3 rounded bg-sky-600"></span>
+                            <span class="text-slate-600">Sudah</span>
+                        </div>
+                        <div class="flex items-center space-x-1.5">
+                            <span class="w-3 h-3 rounded bg-amber-400"></span>
+                            <span class="text-slate-600">Ragu</span>
+                        </div>
+                    </div>
+
+                    <!-- Question Number Buttons Grid -->
+                    <div id="question-grid" class="grid grid-cols-5 gap-2 max-h-80 overflow-y-auto custom-scrollbar p-1">
+                        <!-- Dynamic grid items generated in JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= RESULTS & EXPLANATION VIEW ================= -->
+        <div id="results-view" class="hidden space-y-6 animate-fade-in">
+            <!-- Score Card Hero -->
+            <div class="bg-gradient-to-r from-sky-600 to-indigo-700 rounded-3xl p-6 sm:p-8 text-white shadow-lg relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 opacity-10 text-white pointer-events-none">
+                    <i class="fa-solid fa-award text-9xl"></i>
+                </div>
+
+                <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div class="text-center md:text-left space-y-2">
+                        <span class="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider">Hasil Try Out TKA SD</span>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold" id="result-title">Luar Biasa!</h2>
+                        <p class="text-sky-100 text-sm max-w-md" id="result-subtitle">Kamu telah menyelesaikan seluruh rangkaian soal Try Out Bahasa Indonesia.</p>
+                    </div>
+
+                    <!-- Score Badge Circle -->
+                    <div class="flex items-center space-x-6 bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20">
+                        <div class="text-center">
+                            <div class="text-4xl sm:text-5xl font-black text-amber-300" id="final-score">0</div>
+                            <div class="text-xs text-sky-100 font-medium mt-1">Skor Akhir (0-100)</div>
+                        </div>
+                        <div class="h-12 w-px bg-white/20"></div>
+                        <div class="space-y-1 text-xs">
+                            <div class="flex justify-between space-x-3"><span class="text-emerald-300 font-semibold"><i class="fa-solid fa-circle-check"></i> Benar:</span> <span id="correct-count" class="font-bold">0</span></div>
+                            <div class="flex justify-between space-x-3"><span class="text-rose-300 font-semibold"><i class="fa-solid fa-circle-xmark"></i> Salah:</span> <span id="wrong-count" class="font-bold">0</span></div>
+                            <div class="flex justify-between space-x-3"><span class="text-sky-200 font-semibold"><i class="fa-solid fa-clock"></i> Waktu:</span> <span id="time-spent" class="font-bold">0 mnt</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Review Filter Bar -->
+            <div class="bg-white rounded-2xl p-4 border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <h3 class="text-base font-bold text-slate-800 flex items-center">
+                    <i class="fa-solid fa-book-open text-sky-600 mr-2"></i> Pembahasan & Evaluasi Soal
+                </h3>
+                <div class="flex items-center space-x-2">
+                    <button onclick="filterReview('all')" id="filter-all-btn" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-600 text-white">Semua (<span id="count-filter-all">30</span>)</button>
+                    <button onclick="filterReview('correct')" id="filter-correct-btn" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200">Benar (<span id="count-filter-correct">0</span>)</button>
+                    <button onclick="filterReview('wrong')" id="filter-wrong-btn" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200">Salah (<span id="count-filter-wrong">0</span>)</button>
+                    <button onclick="restartExam()" class="ml-2 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white flex items-center">
+                        <i class="fa-solid fa-rotate-right mr-1"></i> Coba Lagi
+                    </button>
+                </div>
+            </div>
+
+            <!-- Review Items Accordion List -->
+            <div id="review-list" class="space-y-4">
+                <!-- Dynamically generated detailed review cards -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- SUBMIT CONFIRMATION MODAL -->
+    <div id="submit-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-5 shadow-xl animate-fade-in">
+            <div class="text-center space-y-2">
+                <div class="w-14 h-14 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mx-auto text-2xl font-bold">
+                    <i class="fa-solid fa-circle-question"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800">Kirimkan Jawaban Sekarang?</h3>
+                <p class="text-sm text-slate-500">Periksa kembali ringkasan pengerjaan kamu sebelum menyelesaikan ujian ini.</p>
+            </div>
+
+            <!-- Summary Table -->
+            <div class="bg-slate-50 rounded-2xl p-4 text-sm space-y-2.5 border border-slate-100">
+                <div class="flex justify-between items-center text-slate-600">
+                    <span>Sudah Dijawab:</span>
+                    <span id="modal-answered-count" class="font-bold text-emerald-600">0</span>
+                </div>
+                <div class="flex justify-between items-center text-slate-600">
+                    <span>Belum Dijawab:</span>
+                    <span id="modal-unanswered-count" class="font-bold text-rose-600">0</span>
+                </div>
+                <div class="flex justify-between items-center text-slate-600">
+                    <span>Ragu-ragu:</span>
+                    <span id="modal-flagged-count" class="font-bold text-amber-600">0</span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center space-x-3">
+                <button onclick="closeSubmitModal()" class="w-1/2 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm rounded-xl transition-colors">
+                    Periksa Lagi
+                </button>
+                <button onclick="confirmSubmit()" class="w-1/2 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-xl shadow-md transition-colors">
+                    Ya, Selesai
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MOBILE SIDEBAR MODAL -->
+    <div id="mobile-sidebar-modal" class="fixed inset-0 bg-slate-900/50 z-50 hidden lg:hidden flex justify-end">
+        <div class="bg-white w-4/5 max-w-xs h-full p-5 space-y-4 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+                    <h3 class="font-bold text-slate-800">Navigasi Soal</h3>
+                    <button onclick="toggleMobileSidebar()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
+                <div id="mobile-question-grid" class="grid grid-cols-4 gap-2 max-h-[75vh] overflow-y-auto custom-scrollbar p-1">
+                    <!-- Cloned from desktop grid -->
+                </div>
+            </div>
+            <button onclick="openSubmitModal(); toggleMobileSidebar();" class="w-full py-2.5 bg-emerald-600 text-white font-semibold text-sm rounded-xl">
+                Kirim Ujian
+            </button>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-400">
+        Try Out TKA Bahasa Indonesia Jenjang SD • Simulasi Ujian Interaktif
+    </footer>
+
+    <!-- JAVASCRIPT APPLICATION LOGIC -->
+    <script>
+        // Comprehensive Question Dataset (30 Items extracted from standard document)
+        const questionsData = [
+            // STIMULUS 1 (Soal 1-2)
+            {
+                id: 1,
+                type: 'single', // Pilihan Ganda biasa
+                stimulus: `
+                    <div class="font-semibold text-slate-800 mb-1"><i class="fa-solid fa-book-open mr-1 text-sky-600"></i> Kutipan cerita untuk soal nomor 1 dan 2:</div>
+                    <p class="italic text-slate-700 bg-white p-3 rounded-lg border border-sky-100 shadow-2xs">
+                        "Akhirnya Pesta Hutan pun tiba. Semua hewan ikut serta dalam perlombaan dengan semangat. Namun, Beki si Bebek hanya memperhatikan dari jauh. Ia merasa tidak memiliki bakat khusus seperti yang lain.<br>
+                        'Aku tidak bisa menyanyi. Aku juga tidak bisa menari,' ucap Beki si Bebek dengan sedih."<br>
+                        <span class="text-xs text-slate-500 font-normal block mt-1">(Sumber: bobo.grid.id, dengan perubahan)</span>
+                    </p>
+                `,
+                question: "Tokoh hewan apa dalam kutipan cerita tersebut?",
+                options: ["a. ikan", "b. bebek", "c. kambing", "d. burung"],
+                correct: 1, // index 1 (b)
+                explanation: "Tokoh utama hewan yang merasa sedih dan berbicara dalam kutipan teks cerita tersebut adalah Beki si Bebek."
+            },
+            {
+                id: 2,
+                type: 'multiple', // Pilihan Ganda Kompleks
+                stimulusId: 1,
+                question: "Apa saja karakter/suasana yang tergambar dalam cerita tersebut? (Jawaban yang benar lebih dari satu)",
+                options: ["takut", "semangat", "sedih"],
+                correct: [1, 2], // semangat & sedih
+                explanation: "Hewan-hewan lain mengikuti perlombaan dengan semangat, sedangkan Beki si Bebek merasa sedih karena menganggap dirinya tidak berbakat."
+            },
+            {
+                id: 3,
+                type: 'matrix', // Tabel Sesuai / Tidak Sesuai
+                question: "Tentukan Sesuai atau Tidak Sesuai untuk setiap pernyataan tentang kosakata umum dan khusus!",
+                matrixOptions: ["Sesuai", "Tidak Sesuai"],
+                statements: [
+                    { text: "minuman: air, teh, kopi, susu", correct: "Sesuai" },
+                    { text: "makanan: mobil, sepeda, truk, sampan", correct: "Tidak Sesuai" },
+                    { text: "pakaian: baju, jaket, kaus, piama", correct: "Sesuai" }
+                ],
+                explanation: "Minuman dan pakaian dikelompokkan dengan contoh kata khusus yang tepat. Mobil, sepeda, dan truk adalah alat transportasi, bukan makanan."
+            },
+            {
+                id: 4,
+                type: 'matrix',
+                question: "Tentukan Benar atau Salah untuk setiap pernyataan berikut yang merupakan ciri-ciri bagan!",
+                matrixOptions: ["Benar", "Salah"],
+                statements: [
+                    { text: "Memiliki kop surat, nomor surat, lampiran, perihal, dan menggunakan bahasa baku.", correct: "Salah" },
+                    { text: "Menggunakan simbol, garis, dan bentuk gambaran lainnya.", correct: "Benar" },
+                    { text: "Menyajikan informasi secara terstruktur dan mudah dilihat.", correct: "Benar" }
+                ],
+                explanation: "Pernyataan 1 merupakan ciri dari surat resmi. Ciri khas bagan adalah menyajikan data/informasi secara visual dan terstruktur menggunakan garis/simbol."
+            },
+            {
+                id: 5,
+                type: 'single',
+                question: "Manakah yang bukan termasuk unsur intrinsik teks fiksi?",
+                options: ["a. latar belakang penulis", "b. tokoh", "c. alur", "d. amanat"],
+                correct: 0,
+                explanation: "Latar belakang penulis merupakan unsur ekstrinsik (dari luar karya). Tokoh, alur, dan amanat merupakan unsur intrinsik teks fiksi."
+            },
+            {
+                id: 6,
+                type: 'multiple',
+                question: "Manakah kalimat berikut yang termasuk kutipan dalam teks nonfiksi? (Jawaban lebih dari satu)",
+                options: [
+                    "Proklamasi Kemerdekaan Indonesia dibacakan oleh Ir. Soekarno didampingi oleh Drs. Moh. Hatta pada tanggal 17 Agustus 1945.",
+                    "Pohon itu telah berdiri kokoh selama ratusan tahun, menyaksikan suka duka kehidupan manusia yang silih berganti.",
+                    "Berdasarkan data yang dikumpulkan, suhu rata-rata di kutub utara telah meningkat 2 derajat Celsius dalam 50 tahun terakhir."
+                ],
+                correct: [0, 2],
+                explanation: "Kalimat 1 dan 3 memuat data dan fakta nyata (nonfiksi). Kalimat 2 menggunakan ungkapan majas/personifikasi khas karya fiksi."
+            },
+            {
+                id: 7,
+                type: 'matrix',
+                question: "Tentukan Benar atau Salah untuk setiap pernyataan berikut yang merupakan nilai dalam cerita!",
+                matrixOptions: ["Benar", "Salah"],
+                statements: [
+                    { text: "Nilai sosial: nilai tentang hubungan antarmanusia, interaksi sosial, dan norma-norma dalam masyarakat.", correct: "Benar" },
+                    { text: "Nilai pendidikan: nilai tentang ajaran agama, kepercayaan, dan nilai-nilai spiritual.", correct: "Salah" },
+                    { text: "Nilai ekonomi: nilai tentang masalah keuangan, perdagangan, dan kegiatan ekonomi dalam masyarakat.", correct: "Benar" }
+                ],
+                explanation: "Nilai yang mengatur ajaran agama dan kepercayaan adalah nilai agama/religius, bukan nilai pendidikan."
+            },
+            {
+                id: 8,
+                type: 'single',
+                question: "Manakah pernyataan berikut yang menunjukkan perubahan objek pada teks fiksi?",
+                options: [
+                    "a. Sebuah telur yang awalnya cair akan menjadi padat saat dimasak.",
+                    "b. Perkembangan teknologi dari komputer yang besar dan tidak praktis menjadi komputer portabel (laptop) yang mudah dibawa.",
+                    "c. Sebuah mesin yang mengalami kerusakan, kemudian diperbaiki dan berfungsi kembali.",
+                    "d. Sebuah tongkat kayu yang dapat berubah wujud menjadi hewan atau benda lain sesuai keinginan pemiliknya."
+                ],
+                correct: 3,
+                explanation: "Perubahan tongkat kayu menjadi hewan secara ajaib merupakan imajinasi/keajaiban yang ada pada karya fiksi."
+            },
+            {
+                id: 9,
+                type: 'multiple',
+                question: "Bagaimana cara menyimpulkan ide pokok dari sebuah teks? (Jawaban lebih dari satu)",
+                options: [
+                    "Membaca judul teksnya saja.",
+                    "Memperhatikan kalimat demi kalimat dalam teks.",
+                    "Menentukan kalimat utama dan kalimat pendukungnya."
+                ],
+                correct: [1, 2],
+                explanation: "Menyimpulkan ide pokok dilakukan dengan membaca teks secara saksama kalimat demi kalimat serta menentukan kalimat utamanya."
+            },
+            {
+                id: 10,
+                type: 'multiple',
+                question: "Apa saja contoh karakter protagonis dalam cerita? (Jawaban lebih dari satu)",
+                options: ["Jujur", "Pemalas", "Pemaaf"],
+                correct: [0, 2],
+                explanation: "Protagonis adalah tokoh bermoral/berwatak baik seperti jujur dan pemaaf."
+            },
+            // STIMULUS 2 (Soal 11-12)
+            {
+                id: 11,
+                type: 'matrix',
+                stimulus: `
+                    <div class="font-semibold text-slate-800 mb-2"><i class="fa-solid fa-sitemap mr-1 text-sky-600"></i> Bagan berikut untuk mengerjakan soal nomor 11 dan 12:</div>
+                    <div class="bg-white p-3.5 rounded-xl border border-sky-100 text-center space-y-2 text-xs sm:text-sm font-medium">
+                        <div class="bg-sky-600 text-white py-1.5 px-3 rounded-lg font-bold w-fit mx-auto">Budi Daya Sayuran</div>
+                        <div class="text-sky-500">↓</div>
+                        <div class="bg-sky-50 p-2 rounded-lg border border-sky-200"><span class="font-bold text-sky-900">Pembibitan:</span> Pemilihan benih yang baik sangat berpengaruh terhadap hasil panen.</div>
+                        <div class="text-sky-500">↓</div>
+                        <div class="bg-sky-50 p-2 rounded-lg border border-sky-200"><span class="font-bold text-sky-900">Pengolahan tanah:</span> Proses pengolahan lahan dilakukan dengan menggemburkan tanah.</div>
+                        <div class="text-sky-500">↓</div>
+                        <div class="bg-sky-50 p-2 rounded-lg border border-sky-200"><span class="font-bold text-sky-900">Penanaman:</span> Penanaman dapat dilakukan dengan penyemaian atau tanpa penyemaian.</div>
+                        <div class="text-sky-500">↓</div>
+                        <div class="bg-sky-50 p-2 rounded-lg border border-sky-200"><span class="font-bold text-sky-900">Pemeliharaan:</span> Pemeliharaan tanaman dapat berupa pengairan, penyiangan, dan pemupukan.</div>
+                        <div class="text-sky-500">↓</div>
+                        <div class="bg-sky-50 p-2 rounded-lg border border-sky-200"><span class="font-bold text-sky-900">Panen & Pascapanen:</span> Panen dilakukan tepat waktu. Pascapanen meliputi pengumpulan, pemilahan, dan penyimpanan.</div>
+                    </div>
+                `,
+                question: "Tentukan Benar atau Salah untuk setiap pernyataan berikut yang merupakan keterangan dalam bagan!",
+                matrixOptions: ["Benar", "Salah"],
+                statements: [
+                    { text: "Pemilihan benih yang baik sangat berpengaruh terhadap hasil panen.", correct: "Benar" },
+                    { text: "Penanaman dapat dilakukan dengan penyemaian atau tanpa penyemaian.", correct: "Benar" },
+                    { text: "Proses pengolahan lahan dilakukan dengan pengairan atau irigasi.", correct: "Salah" }
+                ],
+                explanation: "Dalam bagan disebutkan pengolahan lahan dilakukan dengan menggemburkan tanah, bukan pengairan/irigasi."
+            },
+            {
+                id: 12,
+                type: 'matrix',
+                stimulusId: 11,
+                question: "Tentukan Sesuai atau Tidak Sesuai untuk setiap pernyataan tentang kegiatan pemeliharaan!",
+                matrixOptions: ["Sesuai", "Tidak Sesuai"],
+                statements: [
+                    { text: "penyemaian", correct: "Tidak Sesuai" },
+                    { text: "pengairan", correct: "Sesuai" },
+                    { text: "pemupukan", correct: "Sesuai" }
+                ],
+                explanation: "Penyemaian masuk dalam tahapan penanaman, sedangkan pengairan dan pemupukan adalah kegiatan pemeliharaan."
+            },
+            {
+                id: 13,
+                type: 'single',
+                question: "Manakah yang bukan termasuk contoh ungkapan atau idiom?",
+                options: ["a. besar kepala", "b. saputangan", "c. naik daun", "d. gulung tikar"],
+                correct: 1,
+                explanation: "Saputangan adalah kata majemuk denotatif (benda nyata), sedangkan pilihan lainnya merupakan idiom/ungkapan bermakna kiasan."
+            },
+            {
+                id: 14,
+                type: 'matrix',
+                question: "Tentukan Benar atau Salah untuk setiap pernyataan berikut yang merupakan cara menyimpulkan respons emosional terhadap unsur teks fiksi!",
+                matrixOptions: ["Benar", "Salah"],
+                statements: [
+                    { text: "Mengecek kesesuaian fakta dan data.", correct: "Salah" },
+                    { text: "Mengidentifikasi unsur-unsur cerita.", correct: "Benar" },
+                    { text: "Menghubungkan dengan pengalaman pribadi.", correct: "Benar" }
+                ],
+                explanation: "Mengecek fakta dan data digunakan untuk menilai teks nonfiksi, bukan keterikatan emosional pada cerita fiksi."
+            },
+            {
+                id: 15,
+                type: 'matrix',
+                question: "Tentukan Sesuai atau Tidak Sesuai untuk setiap pernyataan yang bersifat opini!",
+                matrixOptions: ["Sesuai", "Tidak Sesuai"],
+                statements: [
+                    { text: "Menurut saya, film ini kurang menarik.", correct: "Sesuai" },
+                    { text: "Satu jam sama dengan 3.600 detik.", correct: "Tidak Sesuai" },
+                    { text: "Bunga mawar adalah bunga yang paling indah.", correct: "Sesuai" }
+                ],
+                explanation: "Pernyataan 1 dan 3 mengandung penilaian subjektif (opini). Pernyataan 2 adalah fakta kuantitatif pasti."
+            },
+            // STIMULUS 3 (Soal 16-18)
+            {
+                id: 16,
+                type: 'single',
+                stimulus: `
+                    <div class="font-semibold text-slate-800 mb-1"><i class="fa-solid fa-envelope mr-1 text-sky-600"></i> Surat berikut untuk mengerjakan soal nomor 16 sampai 18:</div>
+                    <p class="text-xs sm:text-sm text-slate-700 bg-white p-3 rounded-lg border border-sky-100 leading-relaxed">
+                        <span class="float-right font-semibold">Semarang, 1 Agustus 2026</span><br>
+                        Halo Yuda,<br><br>
+                        Bagaimana kabarmu saat ini? Semoga kamu dan keluargamu sehat selalu di sana. Sudah lama, ya kita tidak mengobrol sejak lulus SD dan masuk SMP yang berbeda. Aku jadi teringat dengan keseruan kita dulu.<br><br>
+                        Yuda, aku ingin bercerita tentang pengalaman liburanku kemarin. Aku baru saja pergi berlibur bersama keluargaku ke Museum Purbakala Sangiran di Sragen, Jawa Tengah. Wah, tempatnya seru sekali! Kamu pasti akan suka kalau ikut ke sana.<br><br>
+                        Di dalam museum, aku melihat banyak sekali fosil asli manusia purba dan hewan-hewan zaman purba. Ada fosil gajah raksasa, badak, dan bahkan buaya purba yang ukurannya besar sekali. Aku juga belajar banyak tentang sejarah bumi dan gambaran kehidupan manusia ribuan tahun yang lalu.<br><br>
+                        Saat melihat fosil-fosil itu, aku langsung ingat kamu. Dulu kan kita sering membaca buku tentang Dinosaurus dan sejarah bersama di perpustakaan sekolah.<br><br>
+                        Sahabatmu,<br><strong>Toni</strong>
+                    </p>
+                `,
+                question: 'Dalam teks terdapat kalimat "Aku juga belajar banyak tentang sejarah bumi dan gambaran kehidupan manusia ribuan tahun yang lalu". Makna kata sejarah dalam kalimat tersebut adalah ....',
+                options: [
+                    "a. sisa tulang belulang hewan atau sisa tumbuhan zaman purba yang telah membatu",
+                    "b. pengetahuan atau uraian tentang peristiwa dan kejadian yang benar-benar terjadi dalam masa lampau",
+                    "c. hewan raksasa dari zaman prasejarah",
+                    "d. dahulu (tentang zaman yang ribuan atau jutaan tahun yang lalu)"
+                ],
+                correct: 1,
+                explanation: "Makna kata sejarah menurut KBBI adalah pengetahuan atau uraian tentang peristiwa/kejadian nyata pada masa lampau."
+            },
+            {
+                id: 17,
+                type: 'multiple',
+                stimulusId: 16,
+                question: "Dalam surat tersebut, dikatakan bahwa di dalam museum, penulis melihat banyak sekali fosil asli manusia purba dan hewan-hewan zaman purba. Manakah pernyataan yang mendukung ide utama tersebut? (Jawaban lebih dari satu)",
+                options: [
+                    "Sudah lama, ya kita tidak mengobrol sejak lulus SD dan masuk SMP yang berbeda.",
+                    "Ada fosil gajah raksasa, badak, dan bahkan buaya purba yang ukurannya besar sekali.",
+                    "Suasananya keren dan bikin kita seperti masuk ke mesin waktu."
+                ],
+                correct: [1],
+                explanation: "Rincian mengenai contoh fosil gajah raksasa, badak, dan buaya purba secara langsung mendukung gagasan tentang fosil-fosil hewan zaman purba."
+            },
+            {
+                id: 18,
+                type: 'matrix',
+                stimulusId: 16,
+                question: "Apa pelajaran penting yang dapat diambil dari surat Toni? Tentukan Sesuai atau Tidak Sesuai untuk setiap pernyataan berikut!",
+                matrixOptions: ["Sesuai", "Tidak Sesuai"],
+                statements: [
+                    { text: "Mengisi waktu libur panjang dengan mengunjungi tempat bersejarah atau museum adalah pilihan yang bermanfaat.", correct: "Sesuai" },
+                    { text: "Mengunjungi museum membantu kita menghargai perjalanan sejarah bumi dan kehidupan manusia purba.", correct: "Sesuai" },
+                    { text: "Berkirim kabar lewat telepon memberikan manfaat penting untuk menghindari kesalahpahaman.", correct: "Tidak Sesuai" }
+                ],
+                explanation: "Pernyataan 3 tidak sesuai karena media komunikasi yang diceritakan dalam teks adalah surat tertulis, bukan telepon."
+            },
+            // STIMULUS 4 (Soal 19-21)
+            {
+                id: 19,
+                type: 'single',
+                stimulus: `
+                    <div class="font-semibold text-slate-800 mb-1"><i class="fa-solid fa-gears mr-1 text-sky-600"></i> Teks petunjuk untuk mengerjakan soal nomor 19 sampai 21:</div>
+                    <div class="text-xs sm:text-sm text-slate-700 bg-white p-3 rounded-lg border border-sky-100 leading-relaxed space-y-2">
+                        <div class="font-bold text-center text-sky-900 border-b border-sky-100 pb-1">CARA MEMBUAT KAPAL OTOK-OTOK</div>
+                        <p>Kapal otok-otok adalah mainan anak tradisional berbahan kaleng/seng tipis yang bergerak menggunakan tenaga uap dan mengeluarkan bunyi khas "otok-otok".</p>
+                        <p><strong>Alat & Bahan:</strong> Kaleng bekas/seng tipis, pipa tembaga kecil, gunting seng, lem besi/patri, tang, lilin/kapas berminyak (sumber api), dan sarung tangan pelindung.</p>
+                        <p><strong>Langkah Pembuatan:</strong><br>
+                        1. <i>Membuat badan kapal:</i> Gunting dan tekuk pola seng hingga membentuk lambung kedap air.<br>
+                        2. <i>Merakit mesin uap:</i> Buat ketel uap dari seng yang dipatri rapat dan sambungkan dengan pipa kecil.<br>
+                        3. <i>Pemasangan mesin:</i> Pasang ketel dan pipa di bagian tengah lambung kapal.<br>
+                        4. <i>Uji coba:</i> Isi ketel dengan air, letakkan lilin menyala di bawahnya, dan apungkan di air.</p>
+                    </div>
+                `,
+                question: "Apa bahan utama dalam membuat mainan tersebut?",
+                options: ["a. kain atau karung", "b. kaleng atau seng tipis", "c. kayu atau rotan", "d. kertas atau kardus"],
+                correct: 1,
+                explanation: "Bahan utama pembuat lambung kapal dan ketel uap otok-otok adalah kaleng bekas atau seng tipis."
+            },
+            {
+                id: 20,
+                type: 'multiple',
+                stimulusId: 19,
+                question: "Apa kegunaan alat dalam membuat mainan tersebut? (Jawaban yang benar lebih dari satu)",
+                options: [
+                    "Kapas yang diberi minyak goreng sebagai pembersih.",
+                    "Tang untuk membengkokkan logam.",
+                    "Sarung tangan pelindung agar tangan aman saat memotong seng."
+                ],
+                correct: [1, 2],
+                explanation: "Tang digunakan untuk membengkokkan logam dan sarung tangan pelindung digunakan agar tangan aman. Kapas berminyak berguna sebagai bahan bakar/sumber api, bukan pembersih."
+            },
+            {
+                id: 21,
+                type: 'matrix',
+                stimulusId: 19,
+                question: "Tentukan Benar atau Salah untuk setiap pernyataan berikut yang merupakan langkah-langkah pembuatan kapal otok-otok!",
+                matrixOptions: ["Benar", "Salah"],
+                statements: [
+                    { text: "membuat badan kapal", correct: "Benar" },
+                    { text: "merakit mesin uap", correct: "Benar" },
+                    { text: "pengisian bahan bakar", correct: "Salah" }
+                ],
+                explanation: "Membuat badan kapal dan merakit mesin uap adalah penomoran langkah pembuatan utama. Pengisian bahan bakar masuk pada tahap uji coba."
+            },
+            // STIMULUS 5 (Soal 22-24)
+            {
+                id: 22,
+                type: 'single',
+                stimulus: `
+                    <div class="font-semibold text-slate-800 mb-1"><i class="fa-solid fa-chart-pie mr-1 text-sky-600"></i> Infografik untuk mengerjakan soal nomor 22 sampai 24:</div>
+                    <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 p-4 rounded-xl text-xs sm:text-sm text-slate-800 space-y-3">
+                        <div class="font-black text-center text-amber-900 text-sm sm:text-base border-b border-amber-200 pb-1">AKIBAT CUACA PANAS BAGI TUBUH</div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="bg-white/80 p-2.5 rounded-lg border border-amber-100">
+                                <span class="font-bold text-amber-900 block mb-1">Penyebab Cuaca Panas:</span>
+                                <ul class="list-disc list-inside space-y-0.5 text-xs text-slate-700">
+                                    <li>Musim kemarau</li>
+                                    <li>Radiasi matahari maksimum</li>
+                                    <li>Dinamika atmosfer tidak biasa</li>
+                                    <li>Pemanasan global & perubahan iklim</li>
+                                </ul>
+                            </div>
+                            <div class="bg-white/80 p-2.5 rounded-lg border border-amber-100">
+                                <span class="font-bold text-amber-900 block mb-1">Gejala Tubuh Kepanasan:</span>
+                                <ol class="list-decimal list-inside space-y-0.5 text-xs text-slate-700">
+                                    <li>Kelelahan fisik & Pusing</li>
+                                    <li>Sakit kepala & Mual / Muntah</li>
+                                    <li>Tekanan darah rendah</li>
+                                    <li>Peningkatan denyut jantung</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                question: "Apa tema infografik tersebut?",
+                options: ["a. musim kemarau", "b. cuaca panas", "c. krisis kesehatan", "d. bencana kekeringan"],
+                correct: 1,
+                explanation: "Judul utama dan fokus keseluruhan isi infografik membahas tentang dampak serta gejala akibat cuaca panas."
+            },
+            {
+                id: 23,
+                type: 'multiple',
+                stimulusId: 22,
+                question: "Apa penyebab cuaca panas yang terjadi di Indonesia? (Jawaban yang benar lebih dari satu)",
+                options: [
+                    "Pemanasan global dan perubahan iklim.",
+                    "Indonesia berada di wilayah khatulistiwa.",
+                    "Dinamika atmosfer yang tidak biasa."
+                ],
+                correct: [0, 2],
+                explanation: "Sesuai rincian poin dalam infografik, penyebab cuaca panas antara lain pemanasan global/perubahan iklim serta dinamika atmosfer yang tidak biasa."
+            },
+            {
+                id: 24,
+                type: 'multiple',
+                stimulusId: 22,
+                question: "Apa gejala tubuh kepanasan akibat cuaca panas? (Jawaban yang benar lebih dari satu)",
+                options: [
+                    "Tekanan darah rendah.",
+                    "Kulit menggigil dan dingin saat disentuh.",
+                    "Peningkatan denyut jantung."
+                ],
+                correct: [0, 2],
+                explanation: "Gejala tubuh kepanasan yang tercantum pada infografik nomor 6 dan 7 adalah tekanan darah rendah serta peningkatan denyut jantung."
+            },
+            // STIMULUS 6 (Soal 25-27)
+            {
+                id: 25,
+                type: 'single',
+                stimulus: `
+                    <div class="font-semibold text-slate-800 mb-1"><i class="fa-solid fa-umbrella-beach mr-1 text-sky-600"></i> Cerita untuk mengerjakan soal nomor 25 sampai 27:</div>
+                    <div class="text-xs sm:text-sm text-slate-700 bg-white p-3 rounded-lg border border-sky-100 leading-relaxed max-h-60 overflow-y-auto custom-scrollbar space-y-2">
+                        <div class="font-bold text-center text-sky-900">Liburan ke Pantai (Oleh: Asep Sujana)</div>
+                        <p>Libur sekolah telah tiba. Budi dan kakaknya, Rio, mempersiapkan barang-barang untuk dibawa ke pantai. "Iya Bu, Budi sudah tidak sabar mau berenang. Lihat Kak Rio, ini baju renang baru loh," pamer Budi kepada kakaknya.</p>
+                        <p>Setibanya di Pantai Ria Kenjeran Kota Surabaya, Budi dan Rio langsung berenang. Namun saat asyik bermain air, tiba-tiba ada sesuatu yang masuk ke dalam mulut Budi. Ternyata benda itu adalah sampah bekas es krim. Budi merasa kesal karena berenangnya terganggu.</p>
+                        <p>"Kak Rio, kita bersihkan pantai, yuk!" ajak Budi. Budi dan Rio kemudian mengumpulkan sampah di sekitar pantai dan membuangnya ke tempat sampah. Melihat aksi kedua kakak beradik itu, para pengunjung lain tergerak ikut membantu hingga pantai menjadi bersih dan indah kembali.</p>
+                    </div>
+                `,
+                question: "Siapa tokoh yang memamerkan baju renang barunya?",
+                options: ["a. Budi", "b. Kak Rio", "c. Ibu", "d. Ayah"],
+                correct: 0,
+                explanation: "Tokoh yang memamerkan baju renang barunya kepada Kak Rio di perjalanan adalah Budi."
+            },
+            {
+                id: 26,
+                type: 'multiple',
+                stimulusId: 25,
+                question: "Apa peristiwa yang terjadi pada cerita tersebut? (Jawaban yang benar lebih dari satu)",
+                options: [
+                    "Budi merasa kesal karena berenangnya terganggu oleh sampah-sampah yang berserakan di pantai.",
+                    "Budi dan keluarganya sempat tersesat saat berlibur ke pantai yang dituju.",
+                    "Budi dan Rio mengumpulkan sampah di sekitar pantai dan membuangnya ke tempat sampah."
+                ],
+                correct: [0, 2],
+                explanation: "Budi merasa kesal karena kemasukan sampah es krim dan ia bersama Kak Rio bergotong royong memungut sampah pantai."
+            },
+            {
+                id: 27,
+                type: 'matrix',
+                stimulusId: 25,
+                question: 'Dalam cerita, seorang tokoh mengatakan, "Kalau pantai kita bersih, bermain jadi semakin menyenangkan." Menurut kalian, apakah perkataan tersebut dapat dibenarkan? Tentukan Sesuai atau Tidak Sesuai untuk setiap pernyataan!',
+                matrixOptions: ["Sesuai", "Tidak Sesuai"],
+                statements: [
+                    { text: "Sampah di pantai nanti juga hancur atau hanyut sendiri dan tidak merusak kehidupan di air laut.", correct: "Tidak Sesuai" },
+                    { text: "Kita bisa berenang dan melihat ikan atau karang dengan jelas tanpa takut tercemar sampah.", correct: "Sesuai" },
+                    { text: "Udara di pantai terasa segar dan bersih, membuat pikiran lebih tenang saat bermain.", correct: "Sesuai" }
+                ],
+                explanation: "Pernyataan 1 tidak sesuai karena sampah plastik di laut membutuhkan ratusan tahun untuk terurai dan membahayakan hewan laut."
+            },
+            // STIMULUS 7 (Soal 28-30)
+            {
+                id: 28,
+                type: 'single',
+                stimulus: `
+                    <div class="font-semibold text-slate-800 mb-1"><i class="fa-solid fa-glasses mr-1 text-sky-600"></i> Teks berikut untuk mengerjakan soal nomor 28 sampai 30:</div>
+                    <p class="text-xs sm:text-sm text-slate-700 bg-white p-3 rounded-lg border border-sky-100 leading-relaxed space-y-2">
+                        <strong>Mengapa Kita Tidak Boleh Membaca Sambil Tiduran?</strong><br>
+                        Membaca sambil tiduran memang nyaman, namun tidak disarankan. Sebabnya adalah mata kita akan tertuju pada buku dengan sudut yang tidak biasa. Padahal, mata kita harus membentuk sudut sekitar 60 derajat pada objek bacaan saat membaca.<br>
+                        Hal ini direkomendasikan para ahli untuk menjaga kesehatan mata agar tidak mudah lelah. Membaca sambil tiduran akan membuat otot-otot mata tegang. Otot mata yang tegang ini disebut <strong>astenopia</strong>. Astenopia menyebabkan gejala seperti penglihatan kabur, mata merah atau kering, sakit kepala, dan leher kaku.<br>
+                        <span class="text-xs text-slate-500 font-normal">(Sumber: bobo.grid.id)</span>
+                    </p>
+                `,
+                question: "Bagaimana cara membaca buku yang benar?",
+                options: [
+                    "a. Membaca dengan jarak yang sangat dekat pada objek bacaan.",
+                    "b. Membiasakan diri membaca di tempat yang gelap.",
+                    "c. Mata membentuk sudut sekitar 60 derajat pada objek bacaan.",
+                    "d. Membaca dengan posisi duduk serta badan yang membungkuk."
+                ],
+                correct: 2,
+                explanation: "Dalam teks dijelaskan bahwa para ahli merekomendasikan mata membentuk sudut sekitar 60 derajat pada objek bacaan saat membaca."
+            },
+            {
+                id: 29,
+                type: 'single',
+                stimulusId: 28,
+                question: "Apa yang dimaksud astenopia?",
+                options: [
+                    "a. Kondisi kurangnya produksi air mata sehingga mata terasa perih.",
+                    "b. Kondisi saat mata mengeluarkan cairan kental yang membuat kelopak mata lengket.",
+                    "c. Keadaan mata yang dapat melihat dari jarak dekat lebih baik daripada jauh.",
+                    "d. Kondisi lelah atau tegangnya otot-otot mata."
+                ],
+                correct: 3,
+                explanation: "Sesuai isi teks, astenopia adalah sebutan medis untuk kondisi lelah atau tegangnya otot-otot mata."
+            },
+            {
+                id: 30,
+                type: 'multiple',
+                stimulusId: 28,
+                question: "Apa saja gejala yang disebabkan oleh astenopia? (Jawaban yang benar lebih dari satu)",
+                options: ["Penglihatan kabur.", "Sakit gigi.", "Mata merah atau kering."],
+                correct: [0, 2],
+                explanation: "Gejala astenopia yang tertera pada teks meliputi penglihatan kabur, mata merah/kering, sakit kepala, dan leher kaku. Sakit gigi tidak berhubungan dengan astenopia."
+            }
+        ];
+
+        // State Management
+        let currentIndex = 0;
+        let userAnswers = Array(questionsData.length).fill(null);
+        let flagged = Array(questionsData.length).fill(false);
+        let timerSeconds = 60 * 60; // 60 Minutes
+        let timerInterval = null;
+        let isSubmitted = false;
+
+        // Initialize application on window load
+        window.onload = function () {
+            initExam();
+        };
+
+        function initExam() {
+            renderQuestion();
+            renderQuestionGrid();
+            startTimer();
+            updateProgress();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (timerSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    autoSubmitExam();
+                    return;
+                }
+                timerSeconds--;
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timerSeconds / 60);
+            const seconds = timerSeconds % 60;
+            const displayStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            document.getElementById('timer-display').innerText = displayStr;
+        }
+
+        function renderQuestion() {
+            const q = questionsData[currentIndex];
+
+            // Render Numbers & Headers
+            document.getElementById('current-question-num').innerText = currentIndex + 1;
+            document.getElementById('total-questions-num').innerText = questionsData.length;
+
+            // Render Type Badge
+            const badgeEl = document.getElementById('question-type-badge');
+            if (q.type === 'single') {
+                badgeEl.innerText = "Pilihan Ganda (1 Jawaban)";
+                badgeEl.className = "bg-sky-100 text-sky-800 text-xs font-semibold px-2.5 py-1 rounded-full";
+            } else if (q.type === 'multiple') {
+                badgeEl.innerText = "Pilihan Ganda Kompleks (>1 Jawaban)";
+                badgeEl.className = "bg-purple-100 text-purple-800 text-xs font-semibold px-2.5 py-1 rounded-full";
+            } else if (q.type === 'matrix') {
+                badgeEl.innerText = "Tabel Pernyataan";
+                badgeEl.className = "bg-amber-100 text-amber-800 text-xs font-semibold px-2.5 py-1 rounded-full";
+            }
+
+            // Render Stimulus (if present)
+            const stimulusBox = document.getElementById('stimulus-container');
+            let stimulusHTML = q.stimulus || "";
+            if (!stimulusHTML && q.stimulusId) {
+                const parent = questionsData.find(item => item.id === q.stimulusId);
+                if (parent) stimulusHTML = parent.stimulus || "";
+            }
+
+            if (stimulusHTML) {
+                stimulusBox.innerHTML = stimulusHTML;
+                stimulusBox.classList.remove('hidden');
+            } else {
+                stimulusBox.classList.add('hidden');
+            }
+
+            // Render Question Text
+            document.getElementById('question-text').innerText = q.question;
+
+            // Render Options Area based on question type
+            const optionsBox = document.getElementById('options-container');
+            optionsBox.innerHTML = '';
+
+            if (q.type === 'single') {
+                q.options.forEach((opt, idx) => {
+                    const isSelected = userAnswers[currentIndex] === idx;
+                    const btn = document.createElement('button');
+                    btn.onclick = () => selectSingleOption(idx);
+                    btn.className = `w-full text-left p-3.5 sm:p-4 rounded-xl border text-sm sm:text-base font-medium transition-all flex items-start space-x-3 ${
+                        isSelected 
+                            ? 'bg-sky-50 border-sky-500 text-sky-900 shadow-xs' 
+                            : 'bg-white border-slate-200 hover:border-slate-300 text-slate-700'
+                    }`;
+                    btn.innerHTML = `
+                        <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5 shrink-0 ${isSelected ? 'border-sky-600 bg-sky-600' : 'border-slate-300'}">
+                            ${isSelected ? '<div class="w-2 h-2 rounded-full bg-white"></div>' : ''}
+                        </div>
+                        <span class="flex-grow">${opt}</span>
+                    `;
+                    optionsBox.appendChild(btn);
+                });
+            } else if (q.type === 'multiple') {
+                const currentSelected = userAnswers[currentIndex] || [];
+                q.options.forEach((opt, idx) => {
+                    const isSelected = currentSelected.includes(idx);
+                    const btn = document.createElement('button');
+                    btn.onclick = () => toggleMultipleOption(idx);
+                    btn.className = `w-full text-left p-3.5 sm:p-4 rounded-xl border text-sm sm:text-base font-medium transition-all flex items-start space-x-3 ${
+                        isSelected 
+                            ? 'bg-purple-50 border-purple-500 text-purple-900 shadow-xs' 
+                            : 'bg-white border-slate-200 hover:border-slate-300 text-slate-700'
+                    }`;
+                    btn.innerHTML = `
+                        <div class="w-5 h-5 rounded-md border-2 flex items-center justify-center mt-0.5 shrink-0 ${isSelected ? 'border-purple-600 bg-purple-600 text-white' : 'border-slate-300'}">
+                            ${isSelected ? '<i class="fa-solid fa-check text-xs"></i>' : ''}
+                        </div>
+                        <span class="flex-grow">${opt}</span>
+                    `;
+                    optionsBox.appendChild(btn);
+                });
+            } else if (q.type === 'matrix') {
+                const currentAnsMap = userAnswers[currentIndex] || {};
+                const table = document.createElement('div');
+                table.className = "overflow-x-auto border border-slate-200 rounded-xl bg-white";
+                
+                let tableHTML = `
+                    <table class="w-full text-left text-xs sm:text-sm">
+                        <thead class="bg-slate-50 border-b border-slate-200 text-slate-700 font-bold">
+                            <tr>
+                                <th class="p-3">Pernyataan</th>
+                                ${q.matrixOptions.map(opt => `<th class="p-3 text-center w-28">${opt}</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200">
+                `;
+
+                q.statements.forEach((stmt, sIdx) => {
+                    tableHTML += `
+                        <tr class="hover:bg-slate-50/50">
+                            <td class="p-3 text-slate-800 font-medium">${stmt.text}</td>
+                            ${q.matrixOptions.map(opt => {
+                                const isChecked = currentAnsMap[sIdx] === opt;
+                                return `
+                                    <td class="p-3 text-center cursor-pointer" onclick="selectMatrixOption(${sIdx}, '${opt}')">
+                                        <div class="mx-auto w-5 h-5 rounded-full border-2 flex items-center justify-center ${isChecked ? 'border-amber-600 bg-amber-500' : 'border-slate-300'}">
+                                            ${isChecked ? '<div class="w-2 h-2 rounded-full bg-white"></div>' : ''}
+                                        </div>
+                                    </td>
+                                `;
+                            }).join('')}
+                        </tr>
+                    `;
+                });
+
+                tableHTML += `</tbody></table>`;
+                table.innerHTML = tableHTML;
+                optionsBox.appendChild(table);
+            }
+
+            // Update Flag UI State
+            const flagBtn = document.getElementById('flag-btn');
+            const flagIcon = document.getElementById('flag-icon');
+            if (flagged[currentIndex]) {
+                flagBtn.className = "flex items-center text-xs sm:text-sm font-semibold text-amber-700 bg-amber-100 border border-amber-300 px-3 py-1.5 rounded-lg";
+                flagIcon.className = "fa-solid fa-flag mr-1.5 text-amber-600";
+            } else {
+                flagBtn.className = "flex items-center text-xs sm:text-sm font-medium text-slate-500 hover:text-amber-600 bg-slate-50 hover:bg-amber-50 border border-slate-200 px-3 py-1.5 rounded-lg transition-colors";
+                flagIcon.className = "fa-regular fa-flag mr-1.5";
+            }
+
+            // Button Disabling Logic
+            document.getElementById('prev-btn').disabled = currentIndex === 0;
+            document.getElementById('next-btn').disabled = currentIndex === questionsData.length - 1;
+
+            updateProgress();
+            renderQuestionGrid();
+        }
+
+        function selectSingleOption(optionIdx) {
+            userAnswers[currentIndex] = optionIdx;
+            renderQuestion();
+        }
+
+        function toggleMultipleOption(optionIdx) {
+            let list = userAnswers[currentIndex] || [];
+            if (!Array.isArray(list)) list = [];
+
+            if (list.includes(optionIdx)) {
+                list = list.filter(item => item !== optionIdx);
+            } else {
+                list.push(optionIdx);
+            }
+
+            userAnswers[currentIndex] = list;
+            renderQuestion();
+        }
+
+        function selectMatrixOption(statementIdx, optValue) {
+            let currentMap = userAnswers[currentIndex] || {};
+            if (typeof currentMap !== 'object' || Array.isArray(currentMap)) currentMap = {};
+
+            currentMap[statementIdx] = optValue;
+            userAnswers[currentIndex] = { ...currentMap };
+            renderQuestion();
+        }
+
+        function toggleFlag() {
+            flagged[currentIndex] = !flagged[currentIndex];
+            renderQuestion();
+        }
+
+        function nextQuestion() {
+            if (currentIndex < questionsData.length - 1) {
+                currentIndex++;
+                renderQuestion();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderQuestion();
+            }
+        }
+
+        function jumpToQuestion(idx) {
+            currentIndex = idx;
+            renderQuestion();
+            if (!document.getElementById('mobile-sidebar-modal').classList.contains('hidden')) {
+                toggleMobileSidebar();
+            }
+        }
+
+        function renderQuestionGrid() {
+            const gridDesktop = document.getElementById('question-grid');
+            const gridMobile = document.getElementById('mobile-question-grid');
+
+            let gridHTML = '';
+
+            questionsData.forEach((q, idx) => {
+                const isCurrent = idx === currentIndex;
+                const isFlagged = flagged[idx];
+                const hasAnswer = checkHasAnswer(idx);
+
+                let bgClass = "bg-slate-100 text-slate-700 hover:bg-slate-200";
+                if (isFlagged) {
+                    bgClass = "bg-amber-400 text-amber-95 font-bold shadow-xs";
+                } else if (hasAnswer) {
+                    bgClass = "bg-sky-600 text-white font-bold shadow-xs";
+                }
+
+                let borderClass = isCurrent ? "ring-2 ring-offset-2 ring-sky-500" : "";
+
+                gridHTML += `
+                    <button onclick="jumpToQuestion(${idx})" class="h-10 rounded-xl text-xs flex items-center justify-center font-semibold transition-all relative ${bgClass} ${borderClass}">
+                        ${idx + 1}
+                    </button>
+                `;
+            });
+
+            gridDesktop.innerHTML = gridHTML;
+            gridMobile.innerHTML = gridHTML;
+
+            // Update Answered Badge Count
+            let answeredCount = 0;
+            questionsData.forEach((_, idx) => {
+                if (checkHasAnswer(idx)) answeredCount++;
+            });
+            document.getElementById('answered-count-badge').innerText = answeredCount;
+        }
+
+        function checkHasAnswer(idx) {
+            const ans = userAnswers[idx];
+            if (ans === null || ans === undefined) return false;
+            if (Array.isArray(ans)) return ans.length > 0;
+            if (typeof ans === 'object') return Object.keys(ans).length > 0;
+            return true;
+        }
+
+        function updateProgress() {
+            let answeredCount = 0;
+            questionsData.forEach((_, idx) => {
+                if (checkHasAnswer(idx)) answeredCount++;
+            });
+            const percent = (answeredCount / questionsData.length) * 100;
+            document.getElementById('progress-bar fill').style.width = percent + '%';
+        }
+
+        function toggleMobileSidebar() {
+            const modal = document.getElementById('mobile-sidebar-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        function openSubmitModal() {
+            let answered = 0;
+            let flaggedCount = 0;
+
+            questionsData.forEach((_, idx) => {
+                if (checkHasAnswer(idx)) answered++;
+                if (flagged[idx]) flaggedCount++;
+            });
+
+            document.getElementById('modal-answered-count').innerText = answered;
+            document.getElementById('modal-unanswered-count').innerText = questionsData.length - answered;
+            document.getElementById('modal-flagged-count').innerText = flaggedCount;
+
+            document.getElementById('submit-modal').classList.remove('hidden');
+        }
+
+        function closeSubmitModal() {
+            document.getElementById('submit-modal').classList.add('hidden');
+        }
+
+        function autoSubmitExam() {
+            confirmSubmit();
+        }
+
+        function confirmSubmit() {
+            closeSubmitModal();
+            clearInterval(timerInterval);
+            isSubmitted = true;
+
+            // Hide Exam View & Header Controls, Show Results
+            document.getElementById('exam-view').classList.add('hidden');
+            document.getElementById('exam-header-controls').classList.add('hidden');
+            document.getElementById('progress-bar-container').classList.add('hidden');
+            document.getElementById('results-view').classList.remove('hidden');
+
+            calculateResults();
+        }
+
+        let reviewFilter = 'all';
+
+        function calculateResults() {
+            let correctCount = 0;
+
+            questionsData.forEach((q, idx) => {
+                const userAns = userAnswers[idx];
+                let isCorrect = false;
+
+                if (q.type === 'single') {
+                    isCorrect = userAns === q.correct;
+                } else if (q.type === 'multiple') {
+                    if (Array.isArray(userAns)) {
+                        const sortedUser = [...userAns].sort();
+                        const sortedCorrect = [...q.correct].sort();
+                        isCorrect = JSON.stringify(sortedUser) === JSON.stringify(sortedCorrect);
+                    }
+                } else if (q.type === 'matrix') {
+                    if (userAns && typeof userAns === 'object') {
+                        let matrixCorrect = true;
+                        q.statements.forEach((stmt, sIdx) => {
+                            if (userAns[sIdx] !== stmt.correct) {
+                                matrixCorrect = false;
+                            }
+                        });
+                        isCorrect = matrixCorrect;
+                    }
+                }
+
+                if (isCorrect) correctCount++;
+            });
+
+            const wrongCount = questionsData.length - correctCount;
+            const score = Math.round((correctCount / questionsData.length) * 100);
+
+            // Time spent
+            const timeElapsed = (60 * 60) - timerSeconds;
+            const minutesElapsed = Math.ceil(timeElapsed / 60);
+
+            // Fill UI Summary
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('correct-count').innerText = correctCount;
+            document.getElementById('wrong-count').innerText = wrongCount;
+            document.getElementById('time-spent').innerText = `${minutesElapsed} mnt`;
+
+            // Dynamic Title & Message based on Score
+            const titleEl = document.getElementById('result-title');
+            const subTitleEl = document.getElementById('result-subtitle');
+
+            if (score >= 85) {
+                titleEl.innerText = "Sangat Luar Biasa! 🎉";
+                subTitleEl.innerText = "Kamu memiliki pemahaman materi TKA Bahasa Indonesia SD yang sangat tajam!";
+            } else if (score >= 70) {
+                titleEl.innerText = "Bagus Sekali! ⭐";
+                subTitleEl.innerText = "Hasil yang cukup memuaskan, tingkatkan terus pemahamanmu!";
+            } else {
+                titleEl.innerText = "Tetap Semangat! 💪";
+                subTitleEl.innerText = "Pelajari kembali pembahasan di bawah ini untuk memperbaiki kekuranganmu.";
+            }
+
+            // Update Counts in Filter Buttons
+            document.getElementById('count-filter-all').innerText = questionsData.length;
+            document.getElementById('count-filter-correct').innerText = correctCount;
+            document.getElementById('count-filter-wrong').innerText = wrongCount;
+
+            renderReviewList();
+        }
+
+        function filterReview(type) {
+            reviewFilter = type;
+            // Update active filter button styles
+            ['all', 'correct', 'wrong'].forEach(t => {
+                const btn = document.getElementById(`filter-${t}-btn`);
+                if (t === type) {
+                    btn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-600 text-white shadow-xs";
+                } else {
+                    btn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200";
+                }
+            });
+            renderReviewList();
+        }
+
+        function renderReviewList() {
+            const reviewContainer = document.getElementById('review-list');
+            reviewContainer.innerHTML = '';
+
+            questionsData.forEach((q, idx) => {
+                const userAns = userAnswers[idx];
+                let isCorrect = false;
+
+                if (q.type === 'single') {
+                    isCorrect = userAns === q.correct;
+                } else if (q.type === 'multiple') {
+                    if (Array.isArray(userAns)) {
+                        const sortedUser = [...userAns].sort();
+                        const sortedCorrect = [...q.correct].sort();
+                        isCorrect = JSON.stringify(sortedUser) === JSON.stringify(sortedCorrect);
+                    }
+                } else if (q.type === 'matrix') {
+                    if (userAns && typeof userAns === 'object') {
+                        let matrixCorrect = true;
+                        q.statements.forEach((stmt, sIdx) => {
+                            if (userAns[sIdx] !== stmt.correct) {
+                                matrixCorrect = false;
+                            }
+                        });
+                        isCorrect = matrixCorrect;
+                    }
+                }
+
+                // Filter logic
+                if (reviewFilter === 'correct' && !isCorrect) return;
+                if (reviewFilter === 'wrong' && isCorrect) return;
+
+                const card = document.createElement('div');
+                card.className = `bg-white rounded-2xl p-5 border shadow-2xs space-y-4 ${
+                    isCorrect ? 'border-emerald-200' : 'border-rose-200'
+                }`;
+
+                // Formatted User & Correct Answer Strings
+                let userAnsText = "-";
+                let correctAnsText = "";
+
+                if (q.type === 'single') {
+                    userAnsText = userAns !== null ? q.options[userAns] : "<i>Tidak Dijawab</i>";
+                    correctAnsText = q.options[q.correct];
+                } else if (q.type === 'multiple') {
+                    userAnsText = (Array.isArray(userAns) && userAns.length > 0)
+                        ? userAns.map(i => q.options[i]).join(', ')
+                        : "<i>Tidak Dijawab</i>";
+                    correctAnsText = q.correct.map(i => q.options[i]).join(', ');
+                } else if (q.type === 'matrix') {
+                    userAnsText = "<ul class='list-disc list-inside space-y-1 mt-1'>";
+                    if (userAns && typeof userAns === 'object' && Object.keys(userAns).length > 0) {
+                        q.statements.forEach((stmt, sIdx) => {
+                            userAnsText += `<li>${stmt.text}: <strong>${userAns[sIdx] || 'Belum dipilih'}</strong></li>`;
+                        });
+                    } else {
+                        userAnsText = "<i>Tidak Dijawab</i>";
+                    }
+                    if (userAnsText !== "<i>Tidak Dijawab</i>") userAnsText += "</ul>";
+
+                    correctAnsText = "<ul class='list-disc list-inside space-y-1 mt-1'>";
+                    q.statements.forEach((stmt) => {
+                        correctAnsText += `<li>${stmt.text}: <strong>${stmt.correct}</strong></li>`;
+                    });
+                    correctAnsText += "</ul>";
+                }
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div class="flex items-center space-x-2">
+                            <span class="font-bold text-sm text-slate-800">Soal Nomor ${idx + 1}</span>
+                            <span class="text-xs px-2.5 py-0.5 rounded-full font-semibold ${
+                                isCorrect ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                            }">
+                                ${isCorrect ? '<i class="fa-solid fa-circle-check"></i> Benar' : '<i class="fa-solid fa-circle-xmark"></i> Salah'}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="text-slate-800 font-medium text-sm sm:text-base">${q.question}</div>
+
+                    <!-- Comparison Box -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm pt-1">
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                            <span class="text-slate-500 font-medium block mb-1">Jawaban Kamu:</span>
+                            <div class="${isCorrect ? 'text-emerald-700 font-semibold' : 'text-rose-700 font-semibold'}">
+                                ${userAnsText}
+                            </div>
+                        </div>
+                        <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-200">
+                            <span class="text-emerald-800 font-medium block mb-1">Kunci Jawaban Benar:</span>
+                            <div class="text-emerald-900 font-semibold">
+                                ${correctAnsText}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pembahasan Box -->
+                    <div class="bg-sky-50 border border-sky-100 p-3.5 rounded-xl text-xs sm:text-sm text-sky-950 space-y-1">
+                        <span class="font-bold text-sky-900 block"><i class="fa-solid fa-lightbulb text-amber-500 mr-1"></i> Pembahasan:</span>
+                        <p class="leading-relaxed">${q.explanation}</p>
+                    </div>
+                `;
+
+                reviewContainer.appendChild(card);
+            });
+        }
+
+        function restartExam() {
+            currentIndex = 0;
+            userAnswers = Array(questionsData.length).fill(null);
+            flagged = Array(questionsData.length).fill(false);
+            timerSeconds = 60 * 60;
+            isSubmitted = false;
+
+            document.getElementById('results-view').classList.add('hidden');
+            document.getElementById('exam-view').classList.remove('hidden');
+            document.getElementById('exam-header-controls').classList.remove('hidden');
+            document.getElementById('progress-bar-container').classList.remove('hidden');
+
+            initExam();
+        }
+    </script>
+</body>
+</html>
